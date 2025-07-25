@@ -95,7 +95,7 @@
 ##  Technical Info
 
 <details>
-<summary><b>Built with Modern iOS Technologies</b></summary>
+<summary><b>Built with Modern iOS Technologies and swiftUI</b></summary>
 
 - **SwiftUI**: Native, declarative UI framework
 - **SwiftData**: Persistent data storage with Core Data backing
@@ -160,11 +160,11 @@
 <i>Natural gestures and familiar patterns</i>
 </td>
 <td align="center" width="25%">
-⚡<br><b>Fast</b><br>
+<br><b>Fast</b><br>
 <i>Quick access to all features</i>
 </td>
 <td align="center" width="25%">
-♿<br><b>Accessible</b><br>
+<br><b>Accessible</b><br>
 <i>Designed for users of all ages and abilities</i>
 </td>
 </tr>
