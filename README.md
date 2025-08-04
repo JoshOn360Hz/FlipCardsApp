@@ -176,7 +176,7 @@
 <blockquote>
 Unlike complex flashcard apps with overwhelming features, FlipCards strikes the perfect balance between functionality and simplicity. It's designed to look beautiful and work seamlessly, making your study sessions more enjoyable and effective.
 <br><br>
-The app doesn't rely on complex algorithms or spaced repetition systems, instead it provides you with the tools to study at your own pace, your own way. Sometimes the best learning app is the one that gets out of your way and lets you focus on learning.
+The app doesn't rely on complex algorithms, instead it provides you with the tools to study at your own pace, your own way. Sometimes the best learning app is the one that gets out of your way and lets you focus on learning.
 </blockquote>
 </div>
 
