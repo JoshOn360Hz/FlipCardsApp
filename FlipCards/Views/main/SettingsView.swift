@@ -1,4 +1,6 @@
+import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
 private var isRunningOnMac: Bool {
     #if targetEnvironment(macCatalyst)
@@ -12,13 +14,19 @@ private var isRunningOnMac: Bool {
 }
 
 struct SettingsView: View {
+    @Environment(\.modelContext) private var modelContext
     @Binding var isPresented: Bool
+    @Query private var decks: [Deck]
     @State private var showOnboarding = false
     @State private var showingIconSelector = false
     @State private var currentIconName: String = UIApplication.shared.alternateIconName ?? "Default"
     @EnvironmentObject var themeManager: ThemeManager
     @State private var accentColor: String = "blue"
     @State private var colorScheme: String = "system"
+    @State private var showingCSVExporter = false
+    @State private var showingCSVImporter = false
+    @State private var exportDocument = CSVExportDocument()
+    @State private var operationAlert: SettingsOperationAlert?
     
     private var currentAccentColor: Color {
         themeManager.accentColor
@@ -70,6 +78,46 @@ struct SettingsView: View {
                     Text("Appearance")
                 }
                 
+                Section {
+                    Button(action: prepareCSVExport) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up.fill")
+                                .foregroundColor(currentAccentColor)
+                                .frame(width: 24, height: 24)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Export as CSV")
+                                    .foregroundColor(.primary)
+                            }
+
+                            Spacer()
+                        }
+                    }
+                    .disabled(decks.isEmpty)
+
+                    Button(action: { showingCSVImporter = true }) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.down.fill")
+                                .foregroundColor(currentAccentColor)
+                                .frame(width: 24, height: 24)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Import CSV")
+                                    .foregroundColor(.primary)
+                         
+                            }
+
+                            Spacer()
+                        }
+                    }
+                    
+                    Text("CSV import/export includes deck details, card content, multiple choice options, and quiz stats. Drawing attachments are not currently supported.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } header: {
+                    Text("Data")
+                }
+
                 Section {
                     Button(action: { showOnboarding = true }) {
                         HStack {
@@ -169,6 +217,39 @@ struct SettingsView: View {
                 currentIconName: $currentIconName
             )
         }
+        .fileExporter(
+            isPresented: $showingCSVExporter,
+            document: exportDocument,
+            contentType: .commaSeparatedText,
+            defaultFilename: "FlipCards Export"
+        ) { result in
+            switch result {
+            case .success:
+                operationAlert = SettingsOperationAlert(
+                    title: "Export Complete",
+                    message: "Your decks and cards were exported as a CSV file."
+                )
+            case .failure(let error):
+                operationAlert = SettingsOperationAlert(
+                    title: "Export Failed",
+                    message: error.localizedDescription
+                )
+            }
+        }
+        .fileImporter(
+            isPresented: $showingCSVImporter,
+            allowedContentTypes: [.commaSeparatedText, .text],
+            allowsMultipleSelection: false
+        ) { result in
+            handleImport(result)
+        }
+        .alert(item: $operationAlert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
     
     private func displayNameForIcon(_ iconName: String) -> String {
@@ -201,6 +282,48 @@ struct SettingsView: View {
             UIApplication.shared.open(url)
         }
     }
+
+    private func prepareCSVExport() {
+        exportDocument = SettingsHelper.generateCSVExport(from: decks)
+        showingCSVExporter = true
+    }
+
+    private func handleImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else {
+                operationAlert = SettingsOperationAlert(
+                    title: "Import Failed",
+                    message: "No CSV file was selected."
+                )
+                return
+            }
+
+            do {
+                let importResult = try SettingsHelper.importCSV(from: url, into: modelContext)
+                operationAlert = SettingsOperationAlert(
+                    title: "Import Complete",
+                    message: "Imported \(importResult.importedCards) cards and created \(importResult.createdDecks) new decks."
+                )
+            } catch {
+                operationAlert = SettingsOperationAlert(
+                    title: "Import Failed",
+                    message: error.localizedDescription
+                )
+            }
+        case .failure(let error):
+            operationAlert = SettingsOperationAlert(
+                title: "Import Failed",
+                message: error.localizedDescription
+            )
+        }
+    }
+}
+
+struct SettingsOperationAlert: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
 }
 
 struct AppIconSelectorView: View {
