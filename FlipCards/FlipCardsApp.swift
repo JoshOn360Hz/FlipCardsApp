@@ -1,18 +1,21 @@
+// xcode: set sdk=iOS
+
 import SwiftUI
 import SwiftData
+import AppIntents
 
 @main
 struct FlipCardsApp: App {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @StateObject private var themeManager = ThemeManager()
-    
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Deck.self,
             Card.self,
         ])
         let modelConfiguration = ModelConfiguration(
-            schema: schema, 
+            schema: schema,
             isStoredInMemoryOnly: false
         )
 
@@ -36,7 +39,7 @@ struct FlipCardsApp: App {
 struct AppRootView: View {
     @Binding var hasSeenOnboarding: Bool
     @State private var showOnboarding = false
-    
+
     var body: some View {
         Group {
             if hasSeenOnboarding {
@@ -52,6 +55,10 @@ struct AppRootView: View {
                         }
                     }
             }
+        }
+        .task {
+            // Register Siri/Shortcuts phrases on launch
+            FlipCardsShortcuts.updateAppShortcutParameters()
         }
     }
 }

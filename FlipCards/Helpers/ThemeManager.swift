@@ -231,7 +231,6 @@ enum CardTheme: String, CaseIterable {
     }
 }
 
-@MainActor
 class ThemeManager: ObservableObject {
     @Published var accentColor: Color = .blue
     @Published var colorScheme: ColorScheme? = nil

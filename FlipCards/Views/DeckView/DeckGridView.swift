@@ -7,14 +7,14 @@ struct DeckGridView: View {
     @State private var showingRenameAlert = false
     @State private var deckToRename: Deck?
     @State private var newDeckName = ""
-    
+
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [
                 GridItem(.adaptive(minimum: 160), spacing: 16)
             ], spacing: 16) {
                 ForEach(decks, id: \.id) { deck in
-                    NavigationLink(destination: DeckDetailView(deck: deck)) {
+                    NavigationLink(value: AppRoute.deck(deck.id)) {
                         DeckCardView(deck: deck)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -26,7 +26,7 @@ struct DeckGridView: View {
                         } label: {
                             Label("Rename Deck", systemImage: "pencil")
                         }
-                        
+
                         Button(role: .destructive) {
                             deleteDeck(deck)
                         } label: {
@@ -40,12 +40,12 @@ struct DeckGridView: View {
         .alert("Rename Deck", isPresented: $showingRenameAlert) {
             TextField("Deck name", text: $newDeckName)
                 .textInputAutocapitalization(.words)
-            
+
             Button("Cancel", role: .cancel) {
                 deckToRename = nil
                 newDeckName = ""
             }
-            
+
             Button("Rename") {
                 renameDeck()
             }
@@ -54,7 +54,7 @@ struct DeckGridView: View {
             Text("Enter a new name for the deck.")
         }
     }
-    
+
     private func deleteDeck(_ deck: Deck) {
         modelContext.delete(deck)
         do {
@@ -63,22 +63,21 @@ struct DeckGridView: View {
             print("Error deleting deck: \(error)")
         }
     }
-    
+
     private func renameDeck() {
         guard let deck = deckToRename else { return }
-        
+
         let trimmedName = newDeckName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return }
-        
+
         deck.name = trimmedName
-        
+
         do {
             try modelContext.save()
         } catch {
             print("Error renaming deck: \(error)")
         }
-        
-        // Reset state
+
         deckToRename = nil
         newDeckName = ""
     }
