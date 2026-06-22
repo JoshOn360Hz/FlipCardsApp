@@ -1,6 +1,8 @@
 import AppIntents
 
 struct FlipCardsShortcuts: AppShortcutsProvider {
+    static var shortcutTileColor: ShortcutTileColor = .blue
+
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: OpenDeckIntent(),

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppIntents
 
 struct DeckGridView: View {
     let decks: [Deck]
@@ -56,9 +57,14 @@ struct DeckGridView: View {
     }
 
     private func deleteDeck(_ deck: Deck) {
+        let deckID = deck.id
+        let cardIDs = deck.cards.map(\.id)
+
         modelContext.delete(deck)
         do {
             try modelContext.save()
+            Task { await removeDeckFromSpotlight(deckID: deckID, cardIDs: cardIDs) }
+            FlipCardsShortcuts.updateAppShortcutParameters()
         } catch {
             print("Error deleting deck: \(error)")
         }
@@ -74,6 +80,8 @@ struct DeckGridView: View {
 
         do {
             try modelContext.save()
+            Task { await donateDeckToSpotlight(deck) }
+            FlipCardsShortcuts.updateAppShortcutParameters()
         } catch {
             print("Error renaming deck: \(error)")
         }

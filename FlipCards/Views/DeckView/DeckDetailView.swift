@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppIntents
 
 struct DeckDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -133,6 +134,8 @@ struct CardListView: View {
     }
     
     private func deleteCards(offsets: IndexSet) {
+        let deletedCardIDs = offsets.map { cards[$0].id }
+
         for index in offsets {
             let card = cards[index]
             modelContext.delete(card)
@@ -140,6 +143,11 @@ struct CardListView: View {
         
         do {
             try modelContext.save()
+            Task {
+                await removeCardsFromSpotlight(identifiedBy: deletedCardIDs)
+                await donateDeckToSpotlight(deck)
+            }
+            FlipCardsShortcuts.updateAppShortcutParameters()
         } catch {
             print("Error deleting cards: \(error)")
         }

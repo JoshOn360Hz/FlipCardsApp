@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppIntents
 
 struct CardEditorView: View {
     @Environment(\.modelContext) private var modelContext
@@ -228,8 +229,11 @@ struct CardEditorView: View {
         let finalBackText = trimmedBack
         
         guard canSave else { return }
+
+        var deckToIndex: Deck?
         
         if let existingCard = card {
+            deckToIndex = existingCard.deck
             existingCard.frontText = finalFrontText
             existingCard.difficulty = selectedDifficulty
             existingCard.glyph = selectedGlyph
@@ -248,6 +252,8 @@ struct CardEditorView: View {
                 existingCard.correctChoiceIndex = filledOptions.firstIndex(of: mcOptions[correctAnswerIndex]) ?? 0
             }
         } else if let deck = deck {
+            deckToIndex = deck
+
             let newCard = Card(
                 frontText: finalFrontText,
                 backText: selectedCardType == .flashcard ? finalBackText : mcOptions[correctAnswerIndex],
@@ -272,6 +278,10 @@ struct CardEditorView: View {
         
         do {
             try modelContext.save()
+            if let deckToIndex {
+                Task { await donateDeckToSpotlight(deckToIndex) }
+            }
+            FlipCardsShortcuts.updateAppShortcutParameters()
             isPresented = false
         } catch {
             print("Error saving card: \(error)")

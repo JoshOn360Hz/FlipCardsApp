@@ -77,8 +77,7 @@ extension DeckEntityQuery: IndexedEntityQuery {
         let context = ModelContext(container)
         let decks = try context.fetch(FetchDescriptor<Deck>())
         let entities = decks.map { DeckEntity(id: $0.id, name: $0.name, glyph: $0.glyph, cardCount: $0.cards.count) }
-        let items = entities.map { CSSearchableItem(appEntity: $0) }
-        try await CSSearchableIndex(name: "flipcards-decks").indexSearchableItems(items)
+        try await CSSearchableIndex(name: "flipcards-decks").indexAppEntities(entities)
     }
 
     func reindexEntities(for identifiers: [UUID], indexDescription: CSSearchableIndexDescription) async throws {
@@ -88,8 +87,7 @@ extension DeckEntityQuery: IndexedEntityQuery {
         let entities = decks
             .filter { identifiers.contains($0.id) }
             .map { DeckEntity(id: $0.id, name: $0.name, glyph: $0.glyph, cardCount: $0.cards.count) }
-        let items = entities.map { CSSearchableItem(appEntity: $0) }
-        try await CSSearchableIndex(name: "flipcards-decks").indexSearchableItems(items)
+        try await CSSearchableIndex(name: "flipcards-decks").indexAppEntities(entities)
     }
 }
 
@@ -188,8 +186,7 @@ extension CardEntityQuery: IndexedEntityQuery {
             guard let deck = card.deck else { return nil }
             return CardEntity(id: card.id, deckId: deck.id, frontText: card.frontText, backText: card.backText, deckName: deck.name)
         }
-        let items = entities.map { CSSearchableItem(appEntity: $0) }
-        try await CSSearchableIndex(name: "flipcards-cards").indexSearchableItems(items)
+        try await CSSearchableIndex(name: "flipcards-cards").indexAppEntities(entities)
     }
 
     func reindexEntities(for identifiers: [UUID], indexDescription: CSSearchableIndexDescription) async throws {
@@ -202,7 +199,6 @@ extension CardEntityQuery: IndexedEntityQuery {
                 guard let deck = card.deck else { return nil }
                 return CardEntity(id: card.id, deckId: deck.id, frontText: card.frontText, backText: card.backText, deckName: deck.name)
             }
-        let items = entities.map { CSSearchableItem(appEntity: $0) }
-        try await CSSearchableIndex(name: "flipcards-cards").indexSearchableItems(items)
+        try await CSSearchableIndex(name: "flipcards-cards").indexAppEntities(entities)
     }
 }

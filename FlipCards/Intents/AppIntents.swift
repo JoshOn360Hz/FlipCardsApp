@@ -17,6 +17,7 @@ private let pendingNavigationKey = "FlipCards.pendingNavigation"
 struct OpenDeckIntent: OpenIntent {
     static var title: LocalizedStringResource = "Open Deck"
     static var description = IntentDescription("Opens a specific flashcard deck in FlipCards.")
+    static var openAppWhenRun: Bool = true
 
     @Parameter(title: "Deck", description: "The flashcard deck to open.")
     var target: DeckEntity
@@ -64,6 +65,7 @@ struct StartQuizIntent: AppIntent {
 struct ShowCardIntent: OpenIntent {
     static var title: LocalizedStringResource = "Show Card"
     static var description = IntentDescription("Opens a specific flashcard in FlipCards.")
+    static var openAppWhenRun: Bool = true
 
     @Parameter(title: "Card", description: "The flashcard to display.")
     var target: CardEntity

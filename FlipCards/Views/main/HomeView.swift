@@ -95,6 +95,7 @@ struct HomeView: View {
             Task { await donateToSpotlight(decks: decks) }
         }
         .task {
+            FlipCardsShortcuts.updateAppShortcutParameters()
             await donateToSpotlight(decks: decks)
         }
         .onReceive(NotificationCenter.default.publisher(for: .navigateToDeck)) { notification in
@@ -170,6 +171,8 @@ struct HomeView: View {
 
         do {
             try modelContext.save()
+            Task { await donateDeckToSpotlight(deck) }
+            FlipCardsShortcuts.updateAppShortcutParameters()
             newDeckName = ""
             selectedGlyph = .books
             selectedBackground = .blue

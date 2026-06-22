@@ -56,9 +56,6 @@ struct AppRootView: View {
                     }
             }
         }
-        .task {
-            FlipCardsShortcuts.updateAppShortcutParameters()
-            await refreshSpotlightIndex()
-        }
+
     }
 }
