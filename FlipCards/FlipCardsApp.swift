@@ -57,8 +57,8 @@ struct AppRootView: View {
             }
         }
         .task {
-            // Register Siri/Shortcuts phrases on launch
             FlipCardsShortcuts.updateAppShortcutParameters()
+            await refreshSpotlightIndex()
         }
     }
 }

@@ -29,3 +29,15 @@ func donateToSpotlight(decks: [Deck]) async {
     try? await CSSearchableIndex(name: "flipcards-decks").indexSearchableItems(deckItems)
     try? await CSSearchableIndex(name: "flipcards-cards").indexSearchableItems(cardItems)
 }
+
+/// Fetches decks using a standalone container and donates them to Spotlight.
+/// Safe to call without an existing SwiftUI model context (e.g. on background launch).
+func refreshSpotlightIndex() async {
+    guard #available(iOS 18.0, *) else { return }
+    do {
+        let container = try DeckEntityQuery.makeContainer()
+        let context = ModelContext(container)
+        let decks = try context.fetch(FetchDescriptor<Deck>())
+        await donateToSpotlight(decks: decks)
+    } catch {}
+}
